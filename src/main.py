@@ -1,7 +1,8 @@
 from typing import Union
 
 from fastapi import FastAPI
-from api.events import router as event_router
+from api.events.routing import router as event_router
+
 
 
 app = FastAPI()

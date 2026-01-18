@@ -7,3 +7,4 @@ sqlalchemy
 #timescaledb
 psycopg[binary]>=3.1
 requests
+python-decouple
