@@ -1,7 +1,11 @@
 import os
-from fastapi import APIRouter
-from .schemas import (
-EventSchema, 
+from fastapi import APIRouter, Depends
+from sqlmodel import Session
+
+from api.db.session import get_session
+
+from .models import (
+EventModel, 
 EventListSchema, 
 EventCreateSchema,
 EventUpdateSchema,
@@ -26,20 +30,22 @@ def read_events() -> EventListSchema:
 # SEND DATA HERE
 # Create View
 # POST /api/events/
-@router.post("/")
-def create_event(payload:EventCreateSchema) -> EventSchema:
+@router.post("/", response_model=EventModel)
+def create_event(
+    payload:EventCreateSchema,
+    session: Session = Depends(get_session)) :
     # a bunch of items in a table
     
     data = payload.model_dump() # payload -> dict -> pydamtic
-    return {
-       "id": 123,
-       **data
-    }
-
+    obj = EventModel.model_validate(data)
+    session.add(obj)
+    session.commit()
+    session.refresh(obj)
+    return obj
  
 # GET /api/events/12
 @router.get("/{event_id}")
-def get_event(event_id: int) -> EventSchema:
+def get_event(event_id: int) -> EventModel:
     # a single row
     return {
        "id": event_id
@@ -47,7 +53,7 @@ def get_event(event_id: int) -> EventSchema:
 
 # PUT /api/events/12
 @router.put("/{event_id}")
-def update_event(event_id: int, payload: EventUpdateSchema) -> EventSchema:
+def update_event(event_id: int, payload: EventUpdateSchema) -> EventModel:
     # a single row
    
     data = payload.model_dump()
